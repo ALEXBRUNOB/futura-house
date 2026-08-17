@@ -1,0 +1,73 @@
+name: Materialize Saude na Mao Instagram Assets
+
+on:
+  push:
+    branches:
+      - saude-na-mao-assets
+    paths:
+      - .github/workflows/materialize-saude-na-mao-assets.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: saude-na-mao-assets
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --quiet pillow
+      - name: Download and normalize campaign art
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from urllib.parse import unquote
+          from urllib.request import Request, urlopen
+          from io import BytesIO
+          from PIL import Image
+
+          encoded = [
+            'https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F2MovE%2FDAHSh92MovE%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHYGFFNMW3%252F20260816%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20260816T164028Z%26X-Amz-Expires%3D56270%26X-Amz-Signature%3D367585ca7ce46ed0f62515e537319c78ef00d8402919cb2053b28653ac5374af%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DMon%252C%252017%2520Aug%25202026%252008%253A18%253A18%2520GMT',
+            'https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2FSJwWM%2FDAHSh2SJwWM%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHYGFFNMW3%252F20260817%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20260817T051623Z%26X-Amz-Expires%3D10877%26X-Amz-Signature%3D62ae7ef6186b326eca834613d1ea0ae2c6e580015bc605ddcd1fe2c830c9188a%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DMon%252C%252017%2520Aug%25202026%252008%253A17%253A40%2520GMT',
+            'https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2FzD-tU%2FDAHSh9zD-tU%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHYGFFNMW3%252F20260816%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20260816T100633Z%26X-Amz-Expires%3D79924%26X-Amz-Signature%3Dc1e430376bbc02769481e15fe529fa708d2c1444167d581abfe821256e9cd2b3%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DMon%252C%252017%2520Aug%25202026%252008%253A18%253A37%2520GMT',
+            'https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2FqAOKc%2FDAHSh5qAOKc%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHYGFFNMW3%252F20260816%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20260816T104422Z%26X-Amz-Expires%3D77673%26X-Amz-Signature%3D425f013968c0844a82118594caa0e8e1dbf22cee6c819683a16030ef964e5d42%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DMon%252C%252017%2520Aug%25202026%252008%253A18%253A55%2520GMT',
+            'https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2FOz4iU%2FDAHSh3Oz4iU%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHYGFFNMW3%252F20260817%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20260817T050915Z%26X-Amz-Expires%3D11399%26X-Amz-Signature%3D50a1aacde20cd4252ae6c7d4db254eefbc94476b30c6350a085a6717cd5f30a7%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DMon%252C%252017%2520Aug%25202026%252008%253A19%253A14%2520GMT',
+            'https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F0DqA8%2FDAHSh60DqA8%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHYGFFNMW3%252F20260816%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20260816T182454Z%26X-Amz-Expires%3D50082%26X-Amz-Signature%3De7d4ac4c2950c0c7b519a008c840d57758e6076321667eec06c94cb136662858%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DMon%252C%252017%2520Aug%25202026%252008%253A19%253A36%2520GMT',
+            'https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2FgNmhg%2FDAHSh7gNmhg%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHYGFFNMW3%252F20260816%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20260816T073817Z%26X-Amz-Expires%3D88899%26X-Amz-Signature%3D3cbf478d8de8bd5956de02c667e00865c6494394fe425f81b9e188c3b186cab3%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DMon%252C%252017%2520Aug%25202026%252008%253A19%253A56%2520GMT',
+            'https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2FgJWL0%2FDAHSh4gJWL0%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHYGFFNMW3%252F20260817%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20260817T000911Z%26X-Amz-Expires%3D29465%26X-Amz-Signature%3D5edec66c9ef047bdb8ae4287bb0ad15ed1b9ccbd252c2795a0816b35350c24c3%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DMon%252C%252017%2520Aug%25202026%252008%253A20%253A16%2520GMT',
+            'https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2FOoQV4%2FDAHSh5OoQV4%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHYGFFNMW3%252F20260817%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20260817T055119Z%26X-Amz-Expires%3D8954%26X-Amz-Signature%3D31fc76c28f17d04df91d95cbaebaa06fd9376aeea85bf291092c5704240cc960%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DMon%252C%252017%2520Aug%25202026%252008%253A20%253A33%2520GMT',
+            'https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2FrmUKo%2FDAHSh3rmUKo%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHYGFFNMW3%252F20260816%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20260816T140247Z%26X-Amz-Expires%3D65885%26X-Amz-Signature%3Db55c55c6c36288a573f819ade78c93955b87964c4c977de49b966d49eab026f0%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DMon%252C%252017%2520Aug%25202026%252008%253A20%253A52%2520GMT',
+            'https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2FHRrKE%2FDAHSh2HRrKE%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHYGFFNMW3%252F20260817%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20260817T064512Z%26X-Amz-Expires%3D5759%26X-Amz-Signature%3Dab7c472b791d2a15ae82f068b461649eef59033a51375bfc472eeba3db1436f0%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DMon%252C%252017%2520Aug%25202026%252008%253A21%253A11%2520GMT',
+            'https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F8o7b4%2FDAHShw8o7b4%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHYGFFNMW3%252F20260816%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20260816T185822Z%26X-Amz-Expires%3D48188%26X-Amz-Signature%3D97b8e5419064a96da49b22b3d1ffbec1ce4cca336b0e2611a8ae48c96ea4145a%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DMon%252C%252017%2520Aug%25202026%252008%253A21%253A30%2520GMT',
+            'https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2FkhWQ0%2FDAHSh6khWQ0%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHYGFFNMW3%252F20260816%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20260816T221545Z%26X-Amz-Expires%3D36364%26X-Amz-Signature%3D5d059b9f24831b9129405f630b40caeb5c6d92419bfc911b7b70be5476097f28%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DMon%252C%252017%2520Aug%25202026%252008%253A21%253A49%2520GMT',
+            'https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F843dI%2FDAHSh9843dI%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHYGFFNMW3%252F20260816%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20260816T164708Z%26X-Amz-Expires%3D56103%26X-Amz-Signature%3D526ae77946fb29e1e6861306717fa46e0b18bf9d546ae9773d084f0fdb4b5f08%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DMon%252C%252017%2520Aug%25202026%252008%253A22%253A11%2520GMT',
+            'https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2FMvj8k%2FDAHSh1Mvj8k%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHYGFFNMW3%252F20260816%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20260816T151434Z%26X-Amz-Expires%3D61677%26X-Amz-Signature%3D79868c385c9717303946a5ee3187c8bb48aa9e2510e62690b09ccc4083bc6561%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DMon%252C%252017%2520Aug%25202026%252008%253A22%253A31%2520GMT'
+          ]
+
+          out = Path('saude-na-mao-instagram/feed')
+          out.mkdir(parents=True, exist_ok=True)
+          for index, item in enumerate(encoded, 1):
+              url = unquote(item)
+              req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+              with urlopen(req, timeout=60) as response:
+                  payload = response.read()
+              image = Image.open(BytesIO(payload)).convert('RGB')
+              if image.width < 320 or image.height < 400:
+                  raise RuntimeError(f'Arte {index:02d} com dimensoes inesperadas: {image.size}')
+              target = out / f'arte-{index:02d}.jpg'
+              image.save(target, 'JPEG', quality=92, optimize=True, progressive=True)
+              print(index, image.size, target.stat().st_size)
+          PY
+      - name: Commit public assets
+        run: |
+          git config user.name 'saude-na-mao-automation'
+          git config user.email 'actions@users.noreply.github.com'
+          git add saude-na-mao-instagram/feed/*.jpg
+          git diff --cached --quiet && exit 0
+          git commit -m 'Hospeda artes 01 a 15 do Saude na Mao [assets-ready]'
+          git push origin HEAD:saude-na-mao-assets
