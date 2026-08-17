@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex">
+<meta name="referrer" content="no-referrer">
+<title>FUTURA HOUSE × InVideo — Acesso Privado</title>
+<style>
+:root{--red:#D62828;--black:#111111;--white:#FFFFFF}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--black);font-family:Inter,Arial,Helvetica,sans-serif;color:var(--white)}
+body{min-height:100vh;display:grid;place-items:center;padding:24px}.card{width:min(500px,100%);border:1px solid #303030;background:#151515;padding:42px}.logo{width:190px;height:auto;display:block;margin-bottom:40px}.eyebrow{color:var(--red);font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}h1{font-size:34px;line-height:1.04;letter-spacing:-.04em;margin:14px 0 10px}p{margin:0 0 26px;color:#aaa}.field{width:100%;height:50px;border:1px solid #3a3a3a;background:#0f0f0f;color:#fff;padding:0 15px;font-size:16px;outline:none}.field:focus{border-color:#777}.btn{width:100%;height:50px;border:0;background:var(--red);color:#fff;font-weight:800;margin-top:12px;cursor:pointer}.error{min-height:22px;margin-top:14px;color:#e67a7a;font-size:13px}.foot{border-top:1px solid #292929;margin-top:24px;padding-top:18px;color:#666;font-size:11px;letter-spacing:.05em}#room{display:none;position:fixed;inset:0;background:#111}#room iframe{width:100%;height:100%;border:0;background:#111}
+</style>
+</head>
+<body>
+<main class="card" id="login">
+<img class="logo" src="/assets/futura-house-logo-horizontal-negativa.png" alt="FUTURA HOUSE">
+<div class="eyebrow">Private Partnership Room</div>
+<h1>FUTURA HOUSE × InVideo</h1>
+<p>Brazil B2B & Enterprise Partnership</p>
+<form id="form">
+<input class="field" id="password" type="password" autocomplete="current-password" placeholder="Senha de acesso" autofocus>
+<button class="btn" type="submit">ACESSAR</button>
+</form>
+<div class="error" id="error"></div>
+<div class="foot">CONFIDENTIAL · ACCESS RESTRICTED</div>
+</main>
+<div id="room"><iframe id="frame" title="FUTURA HOUSE × InVideo Partnership Room"></iframe></div>
+<script>
+const EXPECTED='7a3ab3de94f664800819110596a6b533f7ca7935e1bbcada3c17f8f15b998af5';
+async function sha256(text){const data=new TextEncoder().encode(text);const hash=await crypto.subtle.digest('SHA-256',data);return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('')}
+function openRoom(){document.getElementById('login').style.display='none';const room=document.getElementById('room');room.style.display='block';document.getElementById('frame').src='/invideo.html';sessionStorage.setItem('fh_invideo_access','ok')}
+if(sessionStorage.getItem('fh_invideo_access')==='ok')openRoom();
+document.getElementById('form').addEventListener('submit',async e=>{e.preventDefault();const error=document.getElementById('error');error.textContent='Verificando…';const ok=(await sha256(document.getElementById('password').value))===EXPECTED;if(ok){error.textContent='';openRoom()}else{error.textContent='Senha incorreta.'}});
+</script>
+</body>
+</html>
