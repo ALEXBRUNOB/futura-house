@@ -10,7 +10,8 @@
 - **CNPJ:** 12.057.094/0001-14
 - **Período:** 08/2025 a 07/2026
 - **Total declarado:** R$ 1.353.062,76
-- **Emissão:** 17/08/2026
+- **Data de referência:** 05/08/2026
+- **Emissão técnica do arquivo:** 17/08/2026
 
 ## Responsáveis indicados no documento
 
@@ -27,15 +28,15 @@
 
 ## Integridade do PDF
 
-**SHA-256 da versão MASTER FINAL:**
+**SHA-256 da versão com data de referência 05/08/2026:**
 
-`D6D792E950F1FC3BBEA4FC2735B6D25E93FFC5ADD76167848798BDB8D646F08F`
+`4E88C45817B9C1F7941E32C6DA404099AD510D316E1D8B7594BC0B6187E091E9`
 
 Para conferir uma cópia recebida, calcule o SHA-256 do arquivo. Se o resultado for exatamente igual ao código acima, a cópia possui o mesmo conteúdo binário da versão registrada.
 
 ## Escopo desta validação
 
-Este é um **registro privado de integridade documental da CONTFERR**, utilizado para identificar a versão emitida e permitir a conferência por hash criptográfico. **Não constitui certificação do SERPRO, ICP-Brasil, Receita Federal ou Conselho Regional de Contabilidade e não substitui assinatura digital quando ela for exigida.**
+Este é um **registro privado de integridade documental da CONTFERR**, utilizado para identificar a versão emitida e permitir a conferência por hash criptográfico. A data de 05/08/2026 está registrada como **data de referência**, não como data de emissão técnica do arquivo. **Não constitui certificação do SERPRO, ICP-Brasil, Receita Federal ou Conselho Regional de Contabilidade e não substitui assinatura digital quando ela for exigida.**
 
 ---
 
