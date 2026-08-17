@@ -1,0 +1,74 @@
+name: Rebuild Arte 03 Highres
+
+on:
+  push:
+    branches: [saude-na-mao-assets]
+    paths:
+      - .github/workflows/rebuild-art03-highres.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: saude-na-mao-assets
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validar blocos e reconstruir WebP
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='.asset-upload/a03'
+          for n in 00 01 02 03 04 05 06 07; do
+            test -f "$base/p${n}.txt" || { echo "FALTA p${n}.txt"; exit 1; }
+            echo "p${n}: $(wc -c < "$base/p${n}.txt") bytes"
+          done
+          : > /tmp/a03.b64
+          for n in 00 01 02 03 04 05 06; do
+            head -c 20000 "$base/p${n}.txt" >> /tmp/a03.b64
+          done
+          head -c 19216 "$base/p07.txt" >> /tmp/a03.b64
+          test "$(wc -c < /tmp/a03.b64)" = "159216"
+          base64 -d /tmp/a03.b64 > /tmp/arte-03.webp
+          echo "WebP reconstruído: $(wc -c < /tmp/arte-03.webp) bytes"
+          file /tmp/arte-03.webp
+
+      - name: Converter e validar 1080x1350
+        run: |
+          python -m pip install --quiet pillow
+          python - <<'PY'
+          from PIL import Image
+          src='/tmp/arte-03.webp'
+          dst='saude-na-mao-instagram/feed/arte-03.jpg'
+          im=Image.open(src)
+          print('ORIGINAL', im.size, im.format)
+          if im.size != (1080,1350):
+              raise SystemExit(f'Resolução inesperada: {im.size}')
+          im=im.convert('RGB')
+          im.save(dst,'JPEG',quality=95,subsampling=0,optimize=True)
+          check=Image.open(dst)
+          print('FINAL', check.size, check.format)
+          if check.size != (1080,1350):
+              raise SystemExit('JPEG final fora de 1080x1350')
+          PY
+
+      - name: Publicar substituição na branch de assets
+        run: |
+          git config user.name 'ALEXBRUNOB'
+          git config user.email 'ALEX.BRUNO@LIVE.COM'
+          git add saude-na-mao-instagram/feed/arte-03.jpg
+          if git diff --cached --quiet; then
+            echo 'Sem alteração.'
+            exit 0
+          fi
+          git commit -m 'Substitui Arte 03 por original 1080x1350'
+          git push origin HEAD:saude-na-mao-assets
