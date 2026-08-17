@@ -1,0 +1,41 @@
+name: Normalize Arte 02 1080x1350
+
+on:
+  push:
+    branches: [saude-na-mao-assets]
+    paths: [.github/workflows/normalize-art02-1080.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: saude-na-mao-assets
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --quiet pillow
+      - run: |
+          python - <<'PY'
+          from PIL import Image, ImageFilter
+          p='saude-na-mao-instagram/feed/arte-02.jpg'
+          im=Image.open(p).convert('RGB')
+          print('ANTES',im.size)
+          if im.size != (1080,1350):
+              im=im.resize((1080,1350),Image.Resampling.LANCZOS)
+              im=im.filter(ImageFilter.UnsharpMask(radius=1.2,percent=125,threshold=2))
+              im.save(p,'JPEG',quality=95,subsampling=0,optimize=True)
+          print('DEPOIS',Image.open(p).size)
+          PY
+          git config user.name 'ALEXBRUNOB'
+          git config user.email 'ALEX.BRUNO@LIVE.COM'
+          git add saude-na-mao-instagram/feed/arte-02.jpg
+          git diff --cached --quiet && exit 0
+          git commit -m 'Corrige Arte 02 para 1080x1350'
+          git push origin HEAD:saude-na-mao-assets
