@@ -1,0 +1,61 @@
+name: Extrair fonte alta Arte 03 do Canva
+on:
+  push:
+    branches: [saude-na-mao-assets]
+    paths: [.github/workflows/extract-art03-canva-source.yml]
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: saude-na-mao-assets
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Instalar cliente leve do Chrome
+        run: npm install playwright-core@latest --no-save >/dev/null 2>&1
+      - name: Capturar maior imagem carregada pelo Canva
+        env:
+          URL: 'https://www.canva.com/d/EQf1ciQNJrziK_G'
+        run: |
+          cat > extract.mjs <<'JS'
+          import { chromium } from 'playwright-core';
+          import fs from 'node:fs';
+          const exe = ['/usr/bin/google-chrome','/usr/bin/chromium','/usr/bin/chromium-browser'].find(fs.existsSync);
+          if (!exe) throw new Error('Chrome nao encontrado');
+          const browser = await chromium.launch({headless:true, executablePath:exe, args:['--no-sandbox']});
+          const page = await browser.newPage({viewport:{width:1080,height:1350}});
+          const candidates=[];
+          page.on('response', async r => {
+            try {
+              const ct=(r.headers()['content-type']||'').toLowerCase();
+              if (!ct.startsWith('image/')) return;
+              const b=await r.body();
+              if (b.length > 50000) candidates.push({url:r.url(), ct, b});
+            } catch {}
+          });
+          await page.goto(process.env.URL,{waitUntil:'domcontentloaded',timeout:90000});
+          await page.waitForTimeout(15000);
+          await browser.close();
+          candidates.sort((a,b)=>b.b.length-a.b.length);
+          console.log('IMAGES', candidates.slice(0,10).map(x=>({bytes:x.b.length,ct:x.ct,url:x.url.slice(0,300)})));
+          if (!candidates.length) throw new Error('Nenhuma imagem candidata');
+          const best=candidates[0];
+          const ext=best.ct.includes('png')?'png':best.ct.includes('webp')?'webp':'jpg';
+          fs.mkdirSync('saude-na-mao-instagram/test',{recursive:true});
+          fs.writeFileSync(`saude-na-mao-instagram/test/arte-03-source.${ext}`,best.b);
+          console.log('BEST',best.b.length,best.ct,best.url);
+          JS
+          timeout 100s node extract.mjs
+          file saude-na-mao-instagram/test/arte-03-source.*
+      - name: Commitar fonte capturada
+        run: |
+          git config user.name ALEXBRUNOB
+          git config user.email ALEX.BRUNO@LIVE.COM
+          git add saude-na-mao-instagram/test/arte-03-source.*
+          git commit -m 'Captura fonte alta da Arte 03 via Canva' || exit 0
+          git push origin HEAD:saude-na-mao-assets
