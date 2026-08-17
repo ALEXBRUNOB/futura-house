@@ -8,7 +8,7 @@ permissions:
 jobs:
   extract:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 2
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,7 +27,7 @@ jobs:
           import fs from 'node:fs';
           const exe = ['/usr/bin/google-chrome','/usr/bin/chromium','/usr/bin/chromium-browser'].find(fs.existsSync);
           if (!exe) throw new Error('Chrome nao encontrado');
-          const browser = await chromium.launch({headless:true, executablePath:exe, args:['--no-sandbox']});
+          const browser = await chromium.launch({headless:true, executablePath:exe, args:['--no-sandbox','--disable-dev-shm-usage']});
           const page = await browser.newPage({viewport:{width:1080,height:1350}});
           const candidates=[];
           page.on('response', async r => {
@@ -35,11 +35,14 @@ jobs:
               const ct=(r.headers()['content-type']||'').toLowerCase();
               if (!ct.startsWith('image/')) return;
               const b=await r.body();
-              if (b.length > 50000) candidates.push({url:r.url(), ct, b});
+              if (b.length > 30000) candidates.push({url:r.url(), ct, b});
             } catch {}
           });
-          await page.goto(process.env.URL,{waitUntil:'domcontentloaded',timeout:90000});
-          await page.waitForTimeout(15000);
+          await Promise.race([
+            page.goto(process.env.URL,{waitUntil:'commit',timeout:20000}).catch(()=>null),
+            new Promise(r=>setTimeout(r,20000))
+          ]);
+          await page.waitForTimeout(12000);
           await browser.close();
           candidates.sort((a,b)=>b.b.length-a.b.length);
           console.log('IMAGES', candidates.slice(0,10).map(x=>({bytes:x.b.length,ct:x.ct,url:x.url.slice(0,300)})));
@@ -50,7 +53,7 @@ jobs:
           fs.writeFileSync(`saude-na-mao-instagram/test/arte-03-source.${ext}`,best.b);
           console.log('BEST',best.b.length,best.ct,best.url);
           JS
-          timeout 100s node extract.mjs
+          timeout 45s node extract.mjs
           file saude-na-mao-instagram/test/arte-03-source.*
       - name: Commitar fonte capturada
         run: |
