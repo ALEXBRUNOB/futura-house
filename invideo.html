@@ -7,11 +7,20 @@
 <meta name="referrer" content="no-referrer">
 <title>FUTURA HOUSE × InVideo — Acesso Privado</title>
 <style>
-:root{--red:#D62828;--black:#111111;--white:#FFFFFF;--soft:#F6F6F6;--line:#E5E5E5;--muted:#727272}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,Arial,Helvetica,sans-serif}body{min-height:100vh;background:var(--white);color:var(--black)}
-.shell{min-height:100vh;display:grid;grid-template-columns:1.05fr .95fr}.visual{background:var(--black);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:52px;position:relative;overflow:hidden}.visual:before{content:"";position:absolute;right:-140px;top:-120px;width:440px;height:440px;border:78px solid rgba(214,40,40,.16);border-radius:50%}.visual:after{content:"";position:absolute;left:-80px;bottom:-100px;width:280px;height:280px;background:var(--red);transform:rotate(22deg);opacity:.12}.visual>*{position:relative;z-index:1}.logo{width:190px;height:auto;display:block}.visual h1{font-size:clamp(48px,6vw,86px);line-height:.93;letter-spacing:-.06em;margin:0;max-width:760px}.visual h1 span{display:block;color:#AFAFAF;font-weight:500}.visual .meta{font-size:11px;color:#777;letter-spacing:.12em;text-transform:uppercase}.access{display:grid;place-items:center;padding:40px;background:var(--soft)}.card{width:min(520px,100%);background:#fff;border:1px solid var(--line);padding:44px;box-shadow:0 20px 60px rgba(0,0,0,.06)}.eyebrow{color:var(--red);font-size:11px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}.card h2{font-size:38px;line-height:1;letter-spacing:-.045em;margin:14px 0 10px}.card p{margin:0 0 30px;color:var(--muted);font-size:15px}.label{display:block;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}.field{width:100%;height:52px;border:1px solid #CFCFCF;background:#fff;color:#111;padding:0 15px;font-size:16px;outline:none;transition:.2s}.field:focus{border-color:#111;box-shadow:0 0 0 3px rgba(17,17,17,.06)}.btn{width:100%;height:52px;border:0;background:var(--red);color:#fff;font-weight:900;margin-top:12px;cursor:pointer;font-size:13px;letter-spacing:.08em;text-transform:uppercase;transition:.2s}.btn:hover{filter:brightness(.94);transform:translateY(-1px)}.error{min-height:22px;margin-top:12px;color:#B51F1F;font-size:13px}.foot{border-top:1px solid var(--line);margin-top:24px;padding-top:18px;color:#999;font-size:10px;letter-spacing:.08em;text-transform:uppercase}.trust{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}.trust span{border:1px solid var(--line);padding:7px 10px;border-radius:999px;font-size:10px;font-weight:700;color:#666}#room{display:none;position:fixed;inset:0;background:#111;z-index:100}#room iframe{width:100%;height:100%;border:0;background:#111}
-@media(max-width:900px){.shell{grid-template-columns:1fr}.visual{min-height:42vh;padding:34px}.visual h1{font-size:48px}.access{padding:24px}.card{padding:32px}}
-@media(max-width:520px){.visual{min-height:36vh;padding:26px}.logo{width:155px}.visual h1{font-size:39px}.card{padding:26px}.card h2{font-size:32px}}
+:root{--red:#D62828;--black:#111111;--white:#FFFFFF;--line:#D9D9D9;--muted:#5F5F5F}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,Arial,Helvetica,sans-serif}body{min-height:100vh;background:var(--black);color:var(--black)}
+.shell{min-height:100vh;display:grid;grid-template-columns:1.08fr .92fr;background:var(--white)}
+.visual{background:var(--black);color:var(--white);display:flex;flex-direction:column;justify-content:space-between;padding:54px 58px;position:relative;overflow:hidden;border-right:12px solid var(--red)}
+.visual:before{content:"";position:absolute;right:-18%;top:10%;width:62%;height:62%;border:58px solid var(--red);opacity:.14;transform:rotate(12deg)}
+.visual:after{content:"";position:absolute;left:0;bottom:0;width:34%;height:12px;background:var(--red)}
+.visual>*{position:relative;z-index:1}.logo{width:205px;height:auto;display:block}
+.visual .eyebrow{color:var(--red)}.visual h1{font-size:clamp(50px,6vw,88px);line-height:.92;letter-spacing:-.06em;margin:0;max-width:780px;font-weight:900}.visual h1 span{display:block;color:var(--white);font-weight:400}.visual .meta{font-size:10px;color:#AFAFAF;letter-spacing:.17em;text-transform:uppercase;font-weight:800}
+.access{display:grid;place-items:center;padding:44px;background:var(--white);position:relative}.access:before{content:"PRIVATE ACCESS";position:absolute;right:22px;top:24px;font-size:9px;letter-spacing:.2em;font-weight:900;color:var(--red)}
+.card{width:min(520px,100%);background:var(--white);border:2px solid var(--black);padding:0;box-shadow:12px 12px 0 var(--black)}.card-head{background:var(--red);color:var(--white);padding:18px 32px;font-size:10px;font-weight:900;letter-spacing:.2em;text-transform:uppercase}.card-body{padding:36px 32px 30px}
+.eyebrow{color:var(--red);font-size:10px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}.card h2{font-size:39px;line-height:.98;letter-spacing:-.05em;margin:12px 0 12px}.card p{margin:0 0 26px;color:var(--muted);font-size:15px;line-height:1.6}.label{display:block;font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}.field{width:100%;height:54px;border:2px solid var(--black);background:var(--white);color:var(--black);padding:0 15px;font-size:16px;outline:none;transition:.15s}.field:focus{border-color:var(--red);box-shadow:4px 4px 0 var(--red)}.btn{width:100%;height:54px;border:2px solid var(--red);background:var(--red);color:var(--white);font-weight:900;margin-top:14px;cursor:pointer;font-size:12px;letter-spacing:.12em;text-transform:uppercase;transition:.15s}.btn:hover{background:var(--black);border-color:var(--black);transform:translateY(-1px)}.error{min-height:22px;margin-top:12px;color:var(--red);font-size:13px;font-weight:700}.foot{border-top:2px solid var(--black);margin-top:22px;padding-top:16px;color:#777;font-size:9px;letter-spacing:.12em;text-transform:uppercase;font-weight:800}.trust{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:26px}.trust span{border:1px solid var(--black);padding:6px 9px;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--black)}.trust span:first-child{background:var(--black);color:var(--white)}.trust span:last-child{border-color:var(--red);color:var(--red)}
+#room{display:none;position:fixed;inset:0;background:var(--black);z-index:100}#room iframe{width:100%;height:100%;border:0;background:var(--black)}
+@media(max-width:900px){.shell{grid-template-columns:1fr}.visual{min-height:40vh;padding:34px;border-right:0;border-bottom:10px solid var(--red)}.visual h1{font-size:48px}.access{padding:34px 24px 48px}.card{box-shadow:8px 8px 0 var(--black)}}
+@media(max-width:520px){.visual{min-height:34vh;padding:26px}.logo{width:165px}.visual h1{font-size:39px}.card-head{padding:15px 24px}.card-body{padding:28px 24px 24px}.card h2{font-size:32px}.access:before{display:none}}
 </style>
 </head>
 <body>
@@ -23,6 +32,8 @@
 </section>
 <section class="access">
 <main class="card">
+<div class="card-head">FUTURA HOUSE® · Executive Room</div>
+<div class="card-body">
 <div class="eyebrow">Acesso restrito</div>
 <h2>Entre na Partnership Room</h2>
 <p>Conteúdo executivo reservado para a discussão da parceria FUTURA HOUSE × InVideo no Brasil.</p>
@@ -34,6 +45,7 @@
 </form>
 <div class="error" id="error"></div>
 <div class="foot">FUTURA HOUSE® · Confidential access</div>
+</div>
 </main>
 </section>
 </div>
