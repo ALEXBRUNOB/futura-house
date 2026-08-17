@@ -1,0 +1,23 @@
+{
+  "documento": "DCF-12057094-20260817-12M",
+  "status": "REGISTRO PUBLICADO - AGUARDANDO ASSINATURAS",
+  "empresa": "JULIO CESAR MENDES 07147057643",
+  "cnpj": "12.057.094/0001-14",
+  "periodo": "08/2025 a 07/2026",
+  "total": "R$ 1.353.062,76",
+  "contador": "EULLER JOSÉ DE ABREU",
+  "crc": "CRC/MG 008867/O",
+  "pgdas_declaracao": "12057094202607001",
+  "pgdas_recibo": "01.07.26229.0001662-5",
+  "pgdas_autenticacao": "12260.05510.70027.94161",
+  "emitido_em": "17/08/2026",
+  "sha256": "538FDF93DADE855288104638B6205AA13CE2F1FA9AAFEF18284F4B6550BC031D",
+  "pdf_parts": [
+    "https://raw.githubusercontent.com/ALEXBRUNOB/futura-house/contferr-validacao-dcf-12057094-20260817/validacao/DCF-12057094-20260817-12M/pdfpart01.txt",
+    "https://raw.githubusercontent.com/ALEXBRUNOB/futura-house/contferr-validacao-dcf-12057094-20260817/validacao/DCF-12057094-20260817-12M/pdfpart02.txt",
+    "https://raw.githubusercontent.com/ALEXBRUNOB/futura-house/contferr-validacao-dcf-12057094-20260817/validacao/DCF-12057094-20260817-12M/pdfpart03.txt",
+    "https://raw.githubusercontent.com/ALEXBRUNOB/futura-house/contferr-validacao-dcf-12057094-20260817/validacao/DCF-12057094-20260817-12M/pdfpart04.txt",
+    "https://raw.githubusercontent.com/ALEXBRUNOB/futura-house/contferr-validacao-dcf-12057094-20260817/validacao/DCF-12057094-20260817-12M/pdfpart05.txt",
+    "https://raw.githubusercontent.com/ALEXBRUNOB/futura-house/contferr-validacao-dcf-12057094-20260817/validacao/DCF-12057094-20260817-12M/pdfpart06.txt"
+  ]
+}
