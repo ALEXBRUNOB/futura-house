@@ -29,7 +29,7 @@ body{min-height:100vh;display:grid;place-items:center;padding:24px}.card{width:m
 <script>
 const EXPECTED='7a3ab3de94f664800819110596a6b533f7ca7935e1bbcada3c17f8f15b998af5';
 async function sha256(text){const data=new TextEncoder().encode(text);const hash=await crypto.subtle.digest('SHA-256',data);return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,'0')).join('')}
-function openRoom(){document.getElementById('login').style.display='none';const room=document.getElementById('room');room.style.display='block';document.getElementById('frame').src='/invideo/room-9c4f7a2e.html';sessionStorage.setItem('fh_invideo_access','ok')}
+function openRoom(){document.getElementById('login').style.display='none';const room=document.getElementById('room');room.style.display='block';document.getElementById('frame').src='room-9c4f7a2e.html';sessionStorage.setItem('fh_invideo_access','ok')}
 if(sessionStorage.getItem('fh_invideo_access')==='ok')openRoom();
 document.getElementById('form').addEventListener('submit',async e=>{e.preventDefault();const error=document.getElementById('error');error.textContent='Verificando…';const ok=(await sha256(document.getElementById('password').value))===EXPECTED;if(ok){error.textContent='';openRoom()}else{error.textContent='Senha incorreta.'}});
 </script>
