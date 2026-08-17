@@ -24,22 +24,20 @@ jobs:
         env:
           URL: 'https://www.canva.com/d/EQf1ciQNJrziK_G'
         run: |
-          cat > /tmp/render.mjs <<'JS'
+          cat > render.mjs <<'JS'
           import { chromium } from 'playwright';
           const browser = await chromium.launch({headless:true});
           const page = await browser.newPage({viewport:{width:1080,height:1350}, deviceScaleFactor:1});
-          await page.goto(process.env.URL,{waitUntil:'networkidle',timeout:120000});
-          await page.waitForTimeout(8000);
-          // remove common chrome/UI overlays if present
-          await page.addStyleTag({content:`header, [role='banner'], [data-testid*='toolbar'], [data-testid*='control'], button { visibility:hidden !important; } body { margin:0 !important; overflow:hidden !important; background:white !important; }`});
-          await page.screenshot({path:'/tmp/full.png', fullPage:false});
+          await page.goto(process.env.URL,{waitUntil:'domcontentloaded',timeout:120000});
+          await page.waitForTimeout(12000);
           console.log('URL', page.url());
           console.log('TITLE', await page.title());
+          await page.screenshot({path:'full.png', fullPage:false});
           await browser.close();
           JS
-          node /tmp/render.mjs
+          node render.mjs
           mkdir -p saude-na-mao-instagram/test
-          cp /tmp/full.png saude-na-mao-instagram/test/arte-03-render.png
+          cp full.png saude-na-mao-instagram/test/arte-03-render.png
       - name: Commitar teste
         run: |
           git config user.name ALEXBRUNOB
