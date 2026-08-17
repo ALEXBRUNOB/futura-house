@@ -3,12 +3,32 @@
   "rewrites": [
     {
       "source": "/invideo",
-      "destination": "/invideo/index.html"
+      "destination": "/invideo.html"
+    },
+    {
+      "source": "/invideo/",
+      "destination": "/invideo.html"
     }
   ],
   "headers": [
     {
       "source": "/invideo",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive, nosnippet, noimageindex" },
+        { "key": "Cache-Control", "value": "private, no-store" },
+        { "key": "Referrer-Policy", "value": "no-referrer" }
+      ]
+    },
+    {
+      "source": "/invideo/",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive, nosnippet, noimageindex" },
+        { "key": "Cache-Control", "value": "private, no-store" },
+        { "key": "Referrer-Policy", "value": "no-referrer" }
+      ]
+    },
+    {
+      "source": "/invideo.html",
       "headers": [
         { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive, nosnippet, noimageindex" },
         { "key": "Cache-Control", "value": "private, no-store" },
