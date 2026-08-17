@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Validação de Documento | CONTFERR</title>
+<style>
+:root{--navy:#0c3558;--blue:#155d8b;--gold:#c7a253;--ink:#1f2933;--muted:#66707b;--bg:#f4f6f8;--line:#d9e0e6}
+*{box-sizing:border-box} body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:linear-gradient(180deg,#eef3f7 0,#f7f8fa 100%);min-height:100vh}
+.top{background:linear-gradient(120deg,var(--blue),var(--navy));color:white;padding:28px 20px;border-bottom:3px solid var(--gold)}
+.wrap{max-width:980px;margin:auto} .brand{display:flex;align-items:center;justify-content:space-between;gap:20px} .brand h1{margin:0;font-size:28px;letter-spacing:.5px} .brand small{opacity:.85;letter-spacing:2px}
+.badge{border:1px solid rgba(255,255,255,.35);padding:9px 13px;border-radius:999px;font-size:12px;background:rgba(255,255,255,.08)}
+main{max-width:980px;margin:28px auto;padding:0 18px 40px} .card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 14px 45px rgba(12,53,88,.08);overflow:hidden}
+.head{padding:28px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;align-items:flex-start} .head h2{margin:5px 0 8px;font-size:27px;color:var(--navy)} .eyebrow{color:var(--gold);font-weight:700;font-size:12px;letter-spacing:2px} .status{padding:8px 11px;border-radius:8px;background:#edf7ef;color:#1b6b35;font-weight:700;font-size:12px;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line)} .cell{padding:18px;border-right:1px solid var(--line)} .cell:last-child{border-right:0} .lab{font-size:10px;letter-spacing:1.5px;color:var(--muted);font-weight:700} .val{margin-top:6px;font-size:15px;font-weight:700;color:var(--navy);word-break:break-word}
+.sec{padding:26px 28px} .sec h3{margin:0 0 16px;color:var(--navy);font-size:16px} .rows{display:grid;grid-template-columns:1fr 1fr;gap:10px 24px} .row{display:flex;justify-content:space-between;gap:15px;padding:9px 0;border-bottom:1px dashed #e2e6ea;font-size:13px} .row span:first-child{color:var(--muted)} .row strong{text-align:right}
+.verify{background:#f7f3ea;border:1px solid #e5d4aa;border-radius:14px;padding:20px;margin-top:18px} code{font-size:11px;word-break:break-all;color:#334155} .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px} a.btn,button{text-decoration:none;border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;font-size:13px} .primary{background:var(--navy);color:white} .secondary{background:white;color:var(--navy);border:1px solid var(--navy)}
+.check{margin-top:20px;padding:18px;border-radius:14px;background:#f8fafc;border:1px solid var(--line)} input[type=file]{max-width:100%} #result{margin-top:12px;font-weight:700;font-size:13px}
+.note{font-size:12px;line-height:1.55;color:var(--muted);margin-top:18px} footer{text-align:center;color:var(--muted);font-size:11px;padding:24px}
+@media(max-width:760px){.brand,.head{flex-direction:column} .grid{grid-template-columns:1fr 1fr} .cell:nth-child(2){border-right:0} .rows{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap brand"><div><h1>CONTFERR</h1><small>CONTABILIDADE E CONSULTORIA</small></div><div class="badge">REGISTRO DE INTEGRIDADE DOCUMENTAL</div></div></header>
+<main><div class="card">
+<div class="head"><div><div class="eyebrow">DOCUMENTO LOCALIZADO</div><h2>Declaração de Faturamento</h2><div id="docid">Carregando registro...</div></div><div class="status" id="status">VALIDANDO...</div></div>
+<div class="grid"><div class="cell"><div class="lab">EMPRESA</div><div class="val" id="empresa">-</div></div><div class="cell"><div class="lab">CNPJ</div><div class="val" id="cnpj">-</div></div><div class="cell"><div class="lab">PERÍODO</div><div class="val" id="periodo">-</div></div><div class="cell"><div class="lab">TOTAL</div><div class="val" id="total">-</div></div></div>
+<div class="sec"><h3>Dados de conferência</h3><div class="rows">
+<div class="row"><span>Contador</span><strong id="contador">-</strong></div><div class="row"><span>CRC</span><strong id="crc">-</strong></div>
+<div class="row"><span>Declaração PGDAS-D</span><strong id="pgdas">-</strong></div><div class="row"><span>Recibo PGDAS-D</span><strong id="recibo">-</strong></div>
+<div class="row"><span>Autenticação PGDAS-D</span><strong id="auth">-</strong></div><div class="row"><span>Emissão</span><strong id="emissao">-</strong></div></div>
+<div class="verify"><div class="lab">SHA-256 DO PDF REGISTRADO</div><code id="hash">-</code><div class="actions"><button class="primary" id="pdf" onclick="downloadRegistered()">Visualizar / baixar PDF registrado</button><button class="secondary" onclick="document.getElementById('file').click()">Conferir arquivo recebido</button></div></div>
+<div class="check"><strong>Conferência de integridade no seu dispositivo</strong><p class="note">Selecione o PDF que você recebeu. O navegador calcula o SHA-256 localmente; o arquivo não é enviado para nenhum servidor.</p><input id="file" type="file" accept="application/pdf" style="display:none"><div id="result"></div></div>
+<p class="note"><strong>Importante:</strong> este registro comprova a correspondência entre a cópia publicada pelo emissor e o arquivo conferido pelo hash criptográfico. Não constitui certificação do SERPRO, ICP-Brasil, Receita Federal ou Conselho Regional de Contabilidade, nem substitui assinatura digital quando exigida.</p></div>
+</div></main><footer>CONTFERR • Controle documental • Ouro Preto/MG</footer>
+<script>
+const META='https://raw.githubusercontent.com/ALEXBRUNOB/futura-house/contferr-validacao-dcf-12057094-20260817/validacao/DCF-12057094-20260817-12M/metadata.json'; let expected='';
+async function load(){try{const r=await fetch(META+'?v='+Date.now()); const m=await r.json(); expected=m.sha256.toUpperCase();
+const set=(id,v)=>document.getElementById(id).textContent=v; set('docid','Protocolo interno: '+m.documento); set('empresa',m.empresa);set('cnpj',m.cnpj);set('periodo',m.periodo);set('total',m.total);set('contador',m.contador);set('crc',m.crc);set('pgdas',m.pgdas_declaracao);set('recibo',m.pgdas_recibo);set('auth',m.pgdas_autenticacao);set('emissao',m.emitido_em);set('hash',m.sha256);set('status',m.status);window.meta=m;}catch(e){document.getElementById('status').textContent='REGISTRO INDISPONÍVEL';document.getElementById('status').style.background='#fff0f0';document.getElementById('status').style.color='#9b1c1c';}}
+load();
+async function downloadRegistered(){try{const parts=await Promise.all(window.meta.pdf_parts.map(async u=>(await fetch(u+'?v='+Date.now())).text()));const b64=parts.join('').replace(/\s+/g,'');const bin=atob(b64);const bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);const blob=new Blob([bytes],{type:'application/pdf'});const url=URL.createObjectURL(blob);window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),60000);}catch(e){alert('Não foi possível carregar a cópia registrada agora.');}}
+document.getElementById('file').addEventListener('change',async e=>{const f=e.target.files[0]; if(!f)return; const b=await f.arrayBuffer(); const h=await crypto.subtle.digest('SHA-256',b); const hex=[...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,'0')).join('').toUpperCase(); const ok=hex===expected; const el=document.getElementById('result'); el.textContent=ok?'✓ ARQUIVO ÍNTEGRO — corresponde exatamente ao PDF registrado.':'✕ ARQUIVO DIFERENTE — o hash não corresponde ao PDF registrado.'; el.style.color=ok?'#1b6b35':'#9b1c1c';});
+</script>
+</body></html>
