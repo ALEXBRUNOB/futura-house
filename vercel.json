@@ -3,11 +3,7 @@
   "rewrites": [
     {
       "source": "/invideo",
-      "destination": "https://futura-house-invideo-private-saude-na-mao-s-projects.vercel.app/"
-    },
-    {
-      "source": "/invideo/:path*",
-      "destination": "https://futura-house-invideo-private-saude-na-mao-s-projects.vercel.app/:path*"
+      "destination": "/invideo/index.html"
     }
   ],
   "headers": [
@@ -29,4 +25,3 @@
     }
   ]
 }
-
