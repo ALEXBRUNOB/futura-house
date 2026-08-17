@@ -1,0 +1,25 @@
+name: Testar fonte alta Arte 03
+on:
+  push:
+    branches: [saude-na-mao-assets]
+    paths: [.github/workflows/test-canva-art03-original.yml]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar fallback original do Canva e medir
+        env:
+          THUMB: 'https://document.canva.com/v2/document-image/hash:-1248667289/height:500/id:DAHSiQ75NSk/type:B/width:400?brand=BAFAGzdTY2A&csig=AAAAAAAAAAAAAAAAAAAAAFD8eLCmAtMhJz1cVJigG756VO7TlZoB4YAMA_jg5-r0&disableexport=T&exp=1786961219&fallback=https%3A%2F%2Fs3.amazonaws.com%2Fdocument-export.canva.com%2F75NSk%2FDAHSiQ75NSk%2F1%2Fthumbnail%2F0001.png%3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3DAKIAQYCGKMUHYGFFNMW3%252F20260817%252Fus-east-1%252Fs3%252Faws4_request%26X-Amz-Date%3D20260817T063618Z%26X-Amz-Expires%3D12641%26X-Amz-Signature%3D4e2e7a6fdb96b5bc5c3eb5bc18fefc86c600c08604957764f1c72f34b16930c0%26X-Amz-SignedHeaders%3Dhost%26response-expires%3DMon%252C%252017%2520Aug%25202026%252010%253A06%253A59%2520GMT&osig=AAAAAAAAAAAAAAAAAAAAADCq7AEYvHyrpfnVVs6PG13vieCoLHTWPERruscMSG4R&page=1&signed=brand%2Cdisableexport%2Cfallback%2Cpage%2Cversion&signer=document-rpc&version=1'
+        run: |
+          python - <<'PY'
+          import os, urllib.parse, urllib.request, struct
+          u=urllib.parse.urlparse(os.environ['THUMB'])
+          fb=urllib.parse.parse_qs(u.query)['fallback'][0]
+          urllib.request.urlretrieve(fb,'/tmp/a.png')
+          b=open('/tmp/a.png','rb').read(24)
+          if b[:8] == b'\x89PNG\r\n\x1a\n':
+              w,h=struct.unpack('>II',b[16:24]); print(f'DIMENSIONS={w}x{h}')
+          else: print('NOT_PNG')
+          PY
