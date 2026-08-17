@@ -1,0 +1,31 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "source": "/invideo",
+      "destination": "https://futura-house-invideo-private-saude-na-mao-s-projects.vercel.app/"
+    },
+    {
+      "source": "/invideo/:path*",
+      "destination": "https://futura-house-invideo-private-saude-na-mao-s-projects.vercel.app/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/invideo",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive, nosnippet, noimageindex" },
+        { "key": "Cache-Control", "value": "private, no-store" },
+        { "key": "Referrer-Policy", "value": "no-referrer" }
+      ]
+    },
+    {
+      "source": "/invideo/:path*",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive, nosnippet, noimageindex" },
+        { "key": "Cache-Control", "value": "private, no-store" },
+        { "key": "Referrer-Policy", "value": "no-referrer" }
+      ]
+    }
+  ]
+}
