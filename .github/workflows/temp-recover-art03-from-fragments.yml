@@ -1,0 +1,84 @@
+name: TEMP Recover SNM Arte 03
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/temp-recover-art03-from-fragments.yml]
+permissions:
+  contents: write
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: saude-na-mao-assets
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --quiet pillow
+      - name: Brute force seguro dos fragmentos restantes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from itertools import permutations, combinations
+          import base64, io, os
+          from PIL import Image
+          base=Path('.asset-upload/a03')
+          parts={n:(base/f'p{n:02d}.txt').read_text() for n in [0,1,2,3,4,5,7]}
+          prefix=''.join(parts[n][:20000] for n in range(6))
+          suffix=parts[7][:19216]
+          fragments={
+              'p02tail':parts[2][20000:],
+              'p03tail':parts[3][20000:],
+              'p07tail':parts[7][19216:],
+          }
+          fix=Path('.asset-upload/a03fix/p02s00.txt')
+          if fix.exists(): fragments['fix']=fix.read_text()
+          print('FRAGMENTS', {k:len(v) for k,v in fragments.items()})
+          candidates=[]
+          vals=list(fragments.items())
+          # Try direct tails and every concatenation/permutation, slicing a 20k p06 window.
+          for r in range(1,len(vals)+1):
+              for perm in permutations(vals,r):
+                  name='+'.join(x[0] for x in perm)
+                  s=''.join(x[1] for x in perm)
+                  if len(s)>=20000:
+                      candidates.append((name,s[:20000]))
+                      candidates.append((name+'[last]',s[-20000:]))
+          # Also scan concatenations at 4-char aligned offsets, in case a fragment has a prefixed duplicate.
+          for name,s in list(candidates):
+              pass
+          seen=set()
+          for idx,(name,p06) in enumerate(candidates,1):
+              if p06 in seen: continue
+              seen.add(p06)
+              b64=prefix+p06+suffix
+              if len(b64)!=159216: continue
+              try:
+                  raw=base64.b64decode(b64,validate=True)
+                  im=Image.open(io.BytesIO(raw))
+                  im.load()
+                  if im.size==(1080,1350):
+                      print('FOUND',name,'format',im.format,'bytes',len(raw))
+                      im=im.convert('RGB')
+                      out=Path('saude-na-mao-instagram/feed/arte-03.jpg')
+                      im.save(out,'JPEG',quality=95,subsampling=0,optimize=True)
+                      chk=Image.open(out); chk.load()
+                      assert chk.size==(1080,1350)
+                      Path('/tmp/found.txt').write_text(name)
+                      raise SystemExit(0)
+              except SystemExit: raise
+              except Exception: pass
+          print('NO_VALID_COMBINATION')
+          raise SystemExit(2)
+          PY
+      - name: Publicar Arte 03 recuperada na branch de assets
+        run: |
+          git config user.name ALEXBRUNOB
+          git config user.email ALEX.BRUNO@LIVE.COM
+          git add saude-na-mao-instagram/feed/arte-03.jpg
+          git commit -m 'Recupera Arte 03 original 1080x1350' || exit 0
+          git pull --rebase origin saude-na-mao-assets
+          git push origin HEAD:saude-na-mao-assets
