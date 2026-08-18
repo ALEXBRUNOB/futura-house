@@ -1,0 +1,51 @@
+name: TEMP SNM Refresh Assets
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/temp-snm-refresh-assets.yml]
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout assets branch
+        uses: actions/checkout@v4
+        with:
+          ref: saude-na-mao-assets
+      - name: Baixar versões 1080x1350 e validar
+        shell: bash
+        env:
+          A01_SMALL: 'https://media.canva.com/v2/image-resize/format:JPG/height:200/quality:75/uri:ifs%3A%2F%2FM%2Ff93b03cc-52c5-4393-a82e-89f0e907c9fb/watermark:F/width:160?csig=AAAAAAAAAAAAAAAAAAAAABSYqNfBApBR1d6N03fPg8TzPuYx79fIBtp7bT3ORcKa&exp=1787112233&osig=AAAAAAAAAAAAAAAAAAAAAAU9DISXfoEsvbNYS-9aoFlQaKraALD8SyeC4cq_A1Qz&signer=media-rpc&x-canva-quality=thumbnail'
+          A03_SMALL: 'https://media.canva.com/v2/image-resize/format:JPG/height:200/quality:75/uri:ifs%3A%2F%2FM%2F5b80d313-e07b-4c55-9d85-cb2efc9008b0/watermark:F/width:160?csig=AAAAAAAAAAAAAAAAAAAAAJSKlqE5xYlMe0fNxRZzmcA2uVZdr48fKi4VPDLX9hK9&exp=1787111654&osig=AAAAAAAAAAAAAAAAAAAAAP-cQX6XAqe3Ia3uCbLPlwsxDAAwgpdebW14SPwCHeNK&signer=media-rpc&x-canva-quality=thumbnail'
+        run: |
+          set -euo pipefail
+          for seq in 01 03; do
+            var="A${seq}_SMALL"
+            small="${!var}"
+            large=${small/height:200/height:1350}
+            large=${large/width:160/width:1080}
+            large=${large/quality:75/quality:95}
+            large=${large/x-canva-quality=thumbnail/x-canva-quality=screen}
+            echo "TESTANDO ARTE $seq"
+            code=$(curl -L --silent --show-error -w '%{http_code}' "$large" -o "/tmp/a${seq}.jpg" || true)
+            echo "HTTP=$code"
+            file "/tmp/a${seq}.jpg" || true
+            identify "/tmp/a${seq}.jpg" || true
+            test "$code" = "200"
+            dims=$(identify -format '%wx%h' "/tmp/a${seq}.jpg")
+            bytes=$(stat -c%s "/tmp/a${seq}.jpg")
+            echo "ARTE $seq -> $dims / $bytes bytes"
+            test "$dims" = "1080x1350"
+            test "$bytes" -gt 200000
+            cp "/tmp/a${seq}.jpg" "saude-na-mao-instagram/feed/arte-${seq}.jpg"
+          done
+      - name: Push assets
+        run: |
+          git config user.name ALEXBRUNOB
+          git config user.email ALEX.BRUNO@LIVE.COM
+          git add saude-na-mao-instagram/feed/arte-01.jpg saude-na-mao-instagram/feed/arte-03.jpg
+          git commit -m 'Atualiza artes 01 e 03 em alta qualidade' || exit 0
+          git pull --rebase origin saude-na-mao-assets
+          git push origin HEAD:saude-na-mao-assets
