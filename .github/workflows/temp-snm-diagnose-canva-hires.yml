@@ -1,0 +1,40 @@
+name: TEMP SNM Diagnose Canva Hires
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/temp-snm-diagnose-canva-hires.yml]
+permissions:
+  contents: write
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: saude-na-mao-assets
+      - name: Diagnosticar URLs
+        shell: bash
+        env:
+          A01_SMALL: 'https://media.canva.com/v2/image-resize/format:JPG/height:200/quality:75/uri:ifs%3A%2F%2FM%2Ff93b03cc-52c5-4393-a82e-89f0e907c9fb/watermark:F/width:160?csig=AAAAAAAAAAAAAAAAAAAAABSYqNfBApBR1d6N03fPg8TzPuYx79fIBtp7bT3ORcKa&exp=1787112233&osig=AAAAAAAAAAAAAAAAAAAAAAU9DISXfoEsvbNYS-9aoFlQaKraALD8SyeC4cq_A1Qz&signer=media-rpc&x-canva-quality=thumbnail'
+          A03_SMALL: 'https://media.canva.com/v2/image-resize/format:JPG/height:200/quality:75/uri:ifs%3A%2F%2FM%2F5b80d313-e07b-4c55-9d85-cb2efc9008b0/watermark:F/width:160?csig=AAAAAAAAAAAAAAAAAAAAAJSKlqE5xYlMe0fNxRZzmcA2uVZdr48fKi4VPDLX9hK9&exp=1787111654&osig=AAAAAAAAAAAAAAAAAAAAAP-cQX6XAqe3Ia3uCbLPlwsxDAAwgpdebW14SPwCHeNK&signer=media-rpc&x-canva-quality=thumbnail'
+        run: |
+          set +e
+          : > /tmp/report.txt
+          for seq in 01 03; do
+            var="A${seq}_SMALL"; small="${!var}"
+            large=${small/height:200/height:1350}; large=${large/width:160/width:1080}; large=${large/quality:75/quality:95}; large=${large/x-canva-quality=thumbnail/x-canva-quality=screen}
+            code=$(curl -L --silent --show-error -w '%{http_code}' "$large" -o "/tmp/a${seq}.jpg")
+            echo "arte-${seq} http=${code} bytes=$(stat -c%s /tmp/a${seq}.jpg 2>/dev/null || echo 0) file=$(file -b /tmp/a${seq}.jpg 2>/dev/null) dims=$(identify -format '%wx%h' /tmp/a${seq}.jpg 2>/dev/null)" >> /tmp/report.txt
+          done
+          cat /tmp/report.txt
+          mkdir -p saude-na-mao-instagram
+          cp /tmp/report.txt saude-na-mao-instagram/hires-diagnostic.txt
+      - name: Commitar diagnostico
+        run: |
+          git config user.name ALEXBRUNOB
+          git config user.email ALEX.BRUNO@LIVE.COM
+          git add saude-na-mao-instagram/hires-diagnostic.txt
+          git commit -m 'Registra diagnóstico de alta resolução Instagram' || exit 0
+          git pull --rebase origin saude-na-mao-assets
+          git push origin HEAD:saude-na-mao-assets
