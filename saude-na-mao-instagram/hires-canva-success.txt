@@ -1,0 +1,17 @@
+status=validated
+validated_at_utc=2026-08-22T11:04:22Z
+target=Instagram portrait 4:5
+arte_01_path=saude-na-mao-instagram/feed/arte-01.jpg
+arte_01_dimensions=1080x1350
+arte_01_bytes=360719
+arte_01_sha256=9fb5c4cc9b65f36f4f9a0f80fe52f8fed264d4f122141e694e488a30c06ffb67
+arte_01_canva_design=DAHS_Vqjrnc
+arte_03_path=saude-na-mao-instagram/feed/arte-03.jpg
+arte_03_dimensions=1080x1350
+arte_03_bytes=379543
+arte_03_sha256=000753a54c8a239d380349d6f075dfd459075808a48c9b758be172255b5f9d07
+arte_03_canva_design=DAHS_Xnm0ck
+source_canvas_dimensions=1080x1350
+source_render_dimensions=480x600
+normalization=Lanczos 1080x1350; UnsharpMask 0x0.7+0.7+0.02; JPEG quality 95; 4:4:4
+validation=visual comparison approved; exact dimensions; JPEG decode; round-trip RMSE arte01 0.00775773, arte03 0.00753743
