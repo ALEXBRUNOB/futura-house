@@ -1,161 +1,89 @@
 name: SNM - Recuperar Artes 01 e 03 em alta
 
 on:
-  schedule:
-    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: snm-extract-hires-from-canva
+  group: snm-validate-hires-assets
   cancel-in-progress: false
 
 jobs:
-  extract:
+  validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - name: Baixar branch isolada de assets
+        uses: actions/checkout@v4
         with:
           ref: saude-na-mao-assets
-          fetch-depth: 0
-      - name: Encerrar se já concluído
-        id: done
-        shell: bash
-        run: |
-          if [ -f saude-na-mao-instagram/hires-canva-success.txt ]; then
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-          fi
-      - uses: actions/setup-node@v4
-        if: steps.done.outputs.skip != 'true'
-        with:
-          node-version: 24
-      - uses: actions/setup-python@v5
-        if: steps.done.outputs.skip != 'true'
+
+      - name: Preparar validação
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Instalar dependências leves
-        if: steps.done.outputs.skip != 'true'
-        run: |
-          npm install playwright-core@latest --no-save >/dev/null 2>&1
-          python -m pip install --quiet pillow
-      - name: Extrair render limpo do Canva
-        if: steps.done.outputs.skip != 'true'
-        env:
-          URL01: 'https://www.canva.com/d/xlDrNb4er2uToPq?embed'
-          URL03: 'https://www.canva.com/d/f887TuPsn45aZ1h?embed'
-        run: |
-          trap 'rm -f .snm-extract.mjs' EXIT
-          cat > .snm-extract.mjs <<'JS'
-          import { chromium } from 'playwright-core';
-          import fs from 'node:fs';
-          const exe=['/usr/bin/google-chrome','/usr/bin/chromium','/usr/bin/chromium-browser'].find(fs.existsSync);
-          if(!exe) throw new Error('Chrome nao encontrado');
-          const browser=await chromium.launch({headless:true,executablePath:exe,args:['--no-sandbox','--disable-dev-shm-usage']});
-          async function extract(seq,url){
-            const page=await browser.newPage({viewport:{width:1080,height:1350},deviceScaleFactor:2});
-            const candidates=[];
-            page.on('response',async r=>{
-              try{
-                const ct=(r.headers()['content-type']||'').toLowerCase();
-                if(!ct.startsWith('image/')) return;
-                const b=await r.body();
-                if(b.length>120000) candidates.push({b,ct,url:r.url()});
-              }catch{}
-            });
-            await page.goto(url,{waitUntil:'domcontentloaded',timeout:45000}).catch(()=>null);
-            await page.waitForTimeout(12000);
-            const imgs=await page.locator('img').all();
-            let best=null;
-            for(const img of imgs){
-              const box=await img.boundingBox().catch(()=>null);
-              const info=await img.evaluate(el=>({nw:el.naturalWidth,nh:el.naturalHeight,src:el.currentSrc||el.src})).catch(()=>null);
-              if(!box||!info) continue;
-              const ratio=info.nh?info.nw/info.nh:0;
-              if(ratio>0.78&&ratio<0.82&&info.nw>=800&&info.nh>=1000){
-                if(!best||info.nw*info.nh>best.info.nw*best.info.nh) best={img,info,box};
-              }
-            }
-            if(best){
-              await best.img.screenshot({path:`/tmp/art-${seq}.png`});
-              console.log('IMG_ELEMENT',seq,best.info,best.box);
-            } else {
-              const canvases=await page.locator('canvas').all();
-              let chosen=null;
-              for(const c of canvases){
-                const box=await c.boundingBox().catch(()=>null);
-                if(!box) continue;
-                const ratio=box.width/box.height;
-                if(ratio>0.78&&ratio<0.82&&box.width>300&&box.height>375){
-                  if(!chosen||box.width*box.height>chosen.box.width*chosen.box.height) chosen={c,box};
-                }
-              }
-              if(chosen){
-                await chosen.c.screenshot({path:`/tmp/art-${seq}.png`});
-                console.log('CANVAS_ELEMENT',seq,chosen.box);
-              } else {
-                candidates.sort((a,b)=>b.b.length-a.b.length);
-                if(candidates.length){
-                  const ext=candidates[0].ct.includes('png')?'png':candidates[0].ct.includes('webp')?'webp':'jpg';
-                  fs.writeFileSync(`/tmp/art-${seq}.${ext}`,candidates[0].b);
-                  console.log('NETWORK_IMAGE',seq,candidates[0].b.length,candidates[0].url);
-                } else {
-                  throw new Error(`Nenhuma fonte visual encontrada para arte ${seq}`);
-                }
-              }
-            }
-            await page.close();
-          }
-          await extract('01',process.env.URL01);
-          await extract('03',process.env.URL03);
-          await browser.close();
-          JS
-          node ./.snm-extract.mjs
-      - name: Normalizar e validar 1080x1350
-        if: steps.done.outputs.skip != 'true'
+
+      - name: Instalar Pillow
+        run: python -m pip install --quiet pillow
+
+      - name: Validar binários finais e gerar manifesto
+        shell: bash
         run: |
           python - <<'PY'
-          from PIL import Image,ImageOps,ImageFilter
+          from hashlib import sha256
+          from json import dumps
           from pathlib import Path
-          out=Path('saude-na-mao-instagram/feed'); out.mkdir(parents=True,exist_ok=True)
-          for seq in ('01','03'):
-              files=list(Path('/tmp').glob(f'art-{seq}.*'))
-              if not files: raise SystemExit(f'ARTE {seq}: fonte ausente')
-              im=Image.open(files[0]).convert('RGB')
-              print('FONTE',seq,im.size,files[0])
-              ratio=im.width/im.height
-              if not 0.78 < ratio < 0.82: raise SystemExit(f'ARTE {seq}: proporcao invalida {im.size}')
-              if im.width < 800 or im.height < 1000: raise SystemExit(f'ARTE {seq}: fonte pequena {im.size}')
-              if im.size != (1080,1350):
-                  im=ImageOps.fit(im,(1080,1350),method=Image.Resampling.LANCZOS)
-              im=im.filter(ImageFilter.UnsharpMask(radius=.8,percent=105,threshold=2))
-              dst=out/f'arte-{seq}.jpg'
-              im.save(dst,'JPEG',quality=95,subsampling=0,optimize=True)
-              ck=Image.open(dst)
-              print('FINAL',seq,ck.size,dst.stat().st_size)
-              if ck.size!=(1080,1350) or dst.stat().st_size<180000: raise SystemExit(f'ARTE {seq}: validacao final falhou')
+          from PIL import Image
+
+          expected = {
+              '01': {
+                  'sha256': '9fb5c4cc9b65f36f4f9a0f80fe52f8fed264d4f122141e694e488a30c06ffb67',
+                  'bytes': 360719,
+              },
+              '03': {
+                  'sha256': '000753a54c8a239d380349d6f075dfd459075808a48c9b758be172255b5f9d07',
+                  'bytes': 379543,
+              },
+          }
+          manifest = {'status': 'validated', 'target': '1080x1350', 'files': {}}
+          for seq, wanted in expected.items():
+              path = Path(f'saude-na-mao-instagram/feed/arte-{seq}.jpg')
+              data = path.read_bytes()
+              digest = sha256(data).hexdigest()
+              with Image.open(path) as image:
+                  image.load()
+                  size = image.size
+                  image_format = image.format
+              if size != (1080, 1350):
+                  raise SystemExit(f'ARTE {seq}: dimensão inválida {size}')
+              if image_format != 'JPEG':
+                  raise SystemExit(f'ARTE {seq}: formato inválido {image_format}')
+              if len(data) != wanted['bytes']:
+                  raise SystemExit(f'ARTE {seq}: tamanho inesperado {len(data)}')
+              if digest != wanted['sha256']:
+                  raise SystemExit(f'ARTE {seq}: SHA-256 divergente {digest}')
+              manifest['files'][path.name] = {
+                  'dimensions': '1080x1350',
+                  'format': image_format,
+                  'bytes': len(data),
+                  'sha256': digest,
+              }
+              print(f'VALIDADA arte-{seq}.jpg 1080x1350 {len(data)} bytes {digest}')
+
+          output = Path('saude-na-mao-instagram/hires-validation-manifest.json')
+          output.write_text(dumps(manifest, ensure_ascii=False, indent=2) + '\n')
           PY
+
       - name: Disponibilizar Artes 01 e 03 em alta
-        if: steps.done.outputs.skip != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: snm-artes-01-e-03-1080x1350
           path: |
             saude-na-mao-instagram/feed/arte-01.jpg
             saude-na-mao-instagram/feed/arte-03.jpg
+            saude-na-mao-instagram/hires-validation-manifest.json
           if-no-files-found: error
           compression-level: 0
           retention-days: 30
-      - name: Publicar assets em alta na branch pública
-        if: steps.done.outputs.skip != 'true'
-        run: |
-          date -u +'%Y-%m-%dT%H:%M:%SZ' > saude-na-mao-instagram/hires-canva-success.txt
-          git config user.name ALEXBRUNOB
-          git config user.email ALEX.BRUNO@LIVE.COM
-          git add saude-na-mao-instagram/feed/arte-01.jpg saude-na-mao-instagram/feed/arte-03.jpg saude-na-mao-instagram/hires-canva-success.txt
-          git commit -m 'Atualiza Artes 01 e 03 com render 1080x1350 validado'
-          git push origin HEAD:saude-na-mao-assets
