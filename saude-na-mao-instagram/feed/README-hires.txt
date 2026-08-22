@@ -1,0 +1,1 @@
+Substituição binária direta das Artes 01 e 03 em alta resolução.
