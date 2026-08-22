@@ -49,7 +49,8 @@ jobs:
           URL01: 'https://www.canva.com/d/xlDrNb4er2uToPq?embed'
           URL03: 'https://www.canva.com/d/f887TuPsn45aZ1h?embed'
         run: |
-          cat > /tmp/extract.mjs <<'JS'
+          trap 'rm -f .snm-extract.mjs' EXIT
+          cat > .snm-extract.mjs <<'JS'
           import { chromium } from 'playwright-core';
           import fs from 'node:fs';
           const exe=['/usr/bin/google-chrome','/usr/bin/chromium','/usr/bin/chromium-browser'].find(fs.existsSync);
@@ -113,7 +114,7 @@ jobs:
           await extract('03',process.env.URL03);
           await browser.close();
           JS
-          node /tmp/extract.mjs
+          node ./.snm-extract.mjs
       - name: Normalizar e validar 1080x1350
         if: steps.done.outputs.skip != 'true'
         run: |
@@ -138,6 +139,17 @@ jobs:
               print('FINAL',seq,ck.size,dst.stat().st_size)
               if ck.size!=(1080,1350) or dst.stat().st_size<180000: raise SystemExit(f'ARTE {seq}: validacao final falhou')
           PY
+      - name: Disponibilizar Artes 01 e 03 em alta
+        if: steps.done.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: snm-artes-01-e-03-1080x1350
+          path: |
+            saude-na-mao-instagram/feed/arte-01.jpg
+            saude-na-mao-instagram/feed/arte-03.jpg
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
       - name: Publicar assets em alta na branch pública
         if: steps.done.outputs.skip != 'true'
         run: |
