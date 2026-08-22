@@ -1,0 +1,43 @@
+name: Teste render SNM Canva 01 e 03
+
+on:
+  push:
+    branches: [saude-na-mao-assets-hires-work]
+    paths: [.github/workflows/render-snm-canva-01-03.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: saude-na-mao-assets-hires-work
+      - name: Renderizar links públicos Canva em 1080x1350
+        shell: bash
+        run: |
+          set -euo pipefail
+          BROWSER=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          test -n "$BROWSER"
+          mkdir -p saude-na-mao-instagram/test
+          "$BROWSER" --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1080,1350 --virtual-time-budget=12000 --screenshot=/tmp/a01.png 'https://www.canva.com/d/xlDrNb4er2uToPq?embed'
+          "$BROWSER" --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=1080,1350 --virtual-time-budget=12000 --screenshot=/tmp/a03.png 'https://www.canva.com/d/f887TuPsn45aZ1h?embed'
+          python - <<'PY'
+          from PIL import Image
+          for src,dst in [('/tmp/a01.png','saude-na-mao-instagram/test/canva-01.png'),('/tmp/a03.png','saude-na-mao-instagram/test/canva-03.png')]:
+              im=Image.open(src)
+              print(src, im.size)
+              if im.size != (1080,1350): raise SystemExit(f'RESOLUCAO INVALIDA {im.size}')
+              im.save(dst)
+          PY
+      - name: Commitar testes
+        run: |
+          git config user.name ALEXBRUNOB
+          git config user.email ALEX.BRUNO@LIVE.COM
+          git add saude-na-mao-instagram/test/canva-01.png saude-na-mao-instagram/test/canva-03.png
+          git commit -m 'Renderiza testes 01 e 03 em 1080x1350' || exit 0
+          git push origin HEAD:saude-na-mao-assets-hires-work
