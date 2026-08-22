@@ -1,5 +1,6 @@
 name: Teste render SNM Canva 01 e 03
 
+# disparo 2026-08-22
 on:
   push:
     branches: [saude-na-mao-assets-hires-work]
