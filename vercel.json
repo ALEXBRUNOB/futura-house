@@ -4,7 +4,9 @@
     { "source": "/invideo", "destination": "/invideo.html" },
     { "source": "/invideo/", "destination": "/invideo.html" },
     { "source": "/convite/paola-maia", "destination": "/convite-paola-maia.html" },
-    { "source": "/convite/paola-maia/", "destination": "/convite-paola-maia.html" }
+    { "source": "/convite/paola-maia/", "destination": "/convite-paola-maia.html" },
+    { "source": "/convite/paolamaia", "destination": "/convite-paola-maia.html" },
+    { "source": "/convite/paolamaia/", "destination": "/convite-paola-maia.html" }
   ],
   "headers": [
     {
@@ -49,6 +51,22 @@
     },
     {
       "source": "/convite/paola-maia/",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive, nosnippet, noimageindex" },
+        { "key": "Cache-Control", "value": "private, no-store" },
+        { "key": "Referrer-Policy", "value": "no-referrer" }
+      ]
+    },
+    {
+      "source": "/convite/paolamaia",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive, nosnippet, noimageindex" },
+        { "key": "Cache-Control", "value": "private, no-store" },
+        { "key": "Referrer-Policy", "value": "no-referrer" }
+      ]
+    },
+    {
+      "source": "/convite/paolamaia/",
       "headers": [
         { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive, nosnippet, noimageindex" },
         { "key": "Cache-Control", "value": "private, no-store" },
